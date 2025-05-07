@@ -71,6 +71,30 @@ include('includes/_sidebar.php');
     </div>
     <!-- End of Delete Multiple Modal -->
 
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form action="code.php" method="POST">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete this faculty record?
+                        <input type="hidden" name="faculty_id" id="delete_faculty_id">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" name="faculty_delete" class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- End of Delete Confirmation Modal -->
+
+
 
     <div id="layoutSidenav_content">
                 <main>
@@ -98,7 +122,7 @@ include('includes/_sidebar.php');
                                             <?php 
                                                 if(isset($_SESSION['success']) && $_SESSION['success'] !="")
                                                 {
-                                                    echo '<h3> '.$_SESSION['success'].' </h3>';
+                                                    echo '<h3 class="bg-success"> '.$_SESSION['success'].' </h3>';
                                                     unset($_SESSION['success']);
                                                 }
 
@@ -153,14 +177,9 @@ include('includes/_sidebar.php');
                                                                         </form>
                                                                     </td>
                                                                     <td> 
-
-                                                                        <form action="code.php" method="post">
-                                                                            <input type="hidden" name="faculty_id" value="<?php echo $row['id']; ?>">
-                                                                        <button type="submit" name="faculty_delete" class="btn btn-danger">
+                                                                        <button type="button" class="btn btn-danger" onclick="confirmDelete(<?php echo $row['id']; ?>)">
                                                                             <i class="bi bi-trash3">DELETE</i>
                                                                         </button>
-                                                                        </form>
-
                                                                     </td>
                                                                 </tr>
                                                                 <?php        
@@ -171,8 +190,6 @@ include('includes/_sidebar.php');
                                                                     echo "No Record Found";
                                                             }                      
                                                             ?>  
-
-
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -214,6 +231,15 @@ include('includes/_sidebar.php');
         });
 
         $('#delete_ids').val(selected.join(','));
+    }
+</script>
+
+<!-- this is for delete comfirmation modal -->
+<script>
+    function confirmDelete(id) {
+        document.getElementById('delete_faculty_id').value = id;
+        var deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        deleteModal.show();
     }
 </script>
 
