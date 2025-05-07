@@ -226,118 +226,99 @@ if(isset($_POST['about_save']))
 // This is from Faculty.php Save Button // 
 include('security.php');
 
-    if(isset($_POST['faculty_save']))
-    {
-        $name = $_POST['faculty_name'];
-        $designation = $_POST['faculty_designation'];
-        $description = $_POST['faculty_description'];
-        $images = $_FILES["faculty_image"]['name'];
-        
-        // Other Shortcut code for line 212 //
-        $img_types = array('image/jpg','image/png','image/jpeg');
-        $validate_img_extension = in_array($_FILES["faculty_image"]['type'], $img_types);
+if(isset($_POST['faculty_save'])) {
+    $name = $_POST['faculty_name'];
+    $designation = $_POST['faculty_designation'];
+    $description = $_POST['faculty_description'];
+    $images = $_FILES["faculty_image"]['name'];
+    
+    // Allowed image types //
+    $img_types = array('image/jpg','image/png','image/jpeg');
+    $validate_img_extension = in_array($_FILES["faculty_image"]['type'], $img_types);
 
+    if($validate_img_extension) {
+        $target_dir = "upload/";
+        $target_file = $target_dir . basename($_FILES["faculty_image"]["name"]);
 
-        if($validate_img_extension)
-        {
-            if(file_exists("upload/" . $_FILES["faculty_image"]["name"]))
-            {
-                $store = $_FILES["faculty_image"]["name"];
-                $_SESSION['status'] = "Image Already Exists! '.$store.'";
+        if(file_exists($target_file)) {
+            // Image already exists, delete the existing image
+            if(unlink($target_file)) {
+                // If the old file is successfully deleted, continue with the new upload
+                $_SESSION['status'] = "Existing image removed, uploading new image.";
+            } else {
+                $_SESSION['status'] = "Failed to delete existing image.";
                 header('Location: faculty.php');
-            }
-            else
-            {
-                    $query = "INSERT INTO faculty (name,designation,description,images,date) VALUES ('$name','$designation','$description','$images', NOW())";
-                    $query_run = mysqli_query($connection, $query);
-                    
-                    if($query_run)
-                    {
-                        move_uploaded_file($_FILES["faculty_image"]["tmp_name"], "upload/".$_FILES["faculty_image"]["name"]);
-                        $_SESSION['success'] = "Faculty Added Successfully!";
-                        header('Location: faculty.php');
-                    }
-                    else
-                    {
-                        $_SESSION['status'] = "Faculty Not Added!";
-                        header('Location: faculty.php');
-                    }
+                exit();
             }
         }
-        else
-        {
-            $_SESSION['status'] = "Only Png, Jpeg, Jpg Images Are Allowed!";
-                    header('Location: faculty.php');
+
+        // Now insert the data into the database
+        $query = "INSERT INTO faculty (name,designation,description,images,date) VALUES ('$name','$designation','$description','$images', NOW())";
+        $query_run = mysqli_query($connection, $query);
+
+        if($query_run) {
+            // Move the new uploaded file
+            move_uploaded_file($_FILES["faculty_image"]["tmp_name"], $target_file);
+            $_SESSION['success'] = "Faculty Added Successfully!";
+            header('Location: faculty.php');
+        } else {
+            $_SESSION['status'] = "Faculty Not Added!";
+            header('Location: faculty.php');
         }
+
+    } else {
+        $_SESSION['status'] = "Only Png, Jpeg, Jpg Images Are Allowed!";
+        header('Location: faculty.php');
     }
+}
+
 
 ?>
 <?php
 
-        // this is from faculty_edit.php Update Button // 
+// this is from faculty_edit.php Update Button // 
 include('security.php');
-    if(isset($_POST['faculty_update']))     
-    {
-            $id = $_POST['faculty_id'];
-            $name = $_POST['faculty_name'];
-            $designation = $_POST['faculty_designation'];
-            $description = $_POST['faculty_description'];
-            $images = $_FILES["faculty_images"]['name'];
-            
-            
+    if(isset($_POST['faculty_update'])) {
+        $id = $_POST['faculty_id'];
+        $name = $_POST['faculty_name'];
+        $designation = $_POST['faculty_designation'];
+        $description = $_POST['faculty_description'];
+        $images = $_FILES["faculty_images"]['name'];
 
-            $faculty_query = "SELECT * FROM faculty WHERE id='$id'";
-            $faculty_query_run = mysqli_query($connection, $faculty_query);
-            foreach($faculty_query_run as $fac_row)
-            {
-                if($images == NULL)
-                {
-                     //Update Existing Image // 
-                    $image_data = $fac_row['images'];
+        $faculty_query = "SELECT * FROM faculty WHERE id='$id'";
+        $faculty_query_run = mysqli_query($connection, $faculty_query);
+        
+        foreach($faculty_query_run as $fac_row) {
+            if($images == NULL) {
+                // Keep existing image
+                $image_data = $fac_row['images'];
+            } else {
+                // Replace with new image, delete old image
+                $old_image_path = "upload/" . $fac_row['images'];
+                if(file_exists($old_image_path)) {
+                    unlink($old_image_path); // delete old image
                 }
-                else
-                {
-                    // Update with new Image and Delete with Old Image //
-                    if($image_path = "upload/".$fac_row['images']);
-                    {
-                        unlink($image_path);
-                        $image_data = $images;
-                    }
-                }
+                $image_data = $images;
             }
-            
+        }
 
-            $query = "UPDATE faculty SET name='$name', designation='$designation', description='$description', images='$image_data' WHERE id='$id' ";
-            $query_run = mysqli_query($connection, $query);
+        $query = "UPDATE faculty SET name='$name', designation='$designation', description='$description', images='$image_data' WHERE id='$id'";
+        $query_run = mysqli_query($connection, $query);
 
-            if($query_run)
-            {
-                if($images == NULL)
-                {
-                     //Update Existing Image // 
-                     $_SESSION['success'] = "Your Data is Updated Successfully with Existing Image!";
-                     header('Location: faculty.php');
-                }
-                else
-                {
-                    // Update with new Image and Delete with Old Image //
-                    move_uploaded_file($_FILES["faculty_images"]["tmp_name"], "upload/".$_FILES["faculty_images"]["name"]);
-                    $_SESSION['success'] = "Your Data is Updated Successfully!";
-                    header('Location: faculty.php');
-                }
-                
+        if($query_run) {
+            if($images != NULL) {
+                move_uploaded_file($_FILES["faculty_images"]["tmp_name"], "upload/" . $_FILES["faculty_images"]["name"]);
+                $_SESSION['success'] = "Your Data is Updated Successfully with New Image!";
+            } else {
+                $_SESSION['success'] = "Your Data is Updated Successfully with Existing Image!";
             }
-            else
-            {
-                $_SESSION['status'] = "Your Data is NOT Updated!";
-                header('Location: faculty.php');
-            }
+            header('Location: faculty.php');
+        } else {
+            $_SESSION['status'] = "Your Data is NOT Updated!";
+            header('Location: faculty.php');
+        }
+    }
 
-    } 
-    
-    
-    
-   
 ?>
 <?php
         // this is from faculty.php Delete button //
@@ -369,37 +350,42 @@ include('security.php');
         <!-- This is the code for script in the faculty.php to toggle on alert -->
 <?php 
 include('security.php');
+    
+    if(isset($_POST['search_data']))
+    {
+        $id = $_POST['id'];
+        $visible = $_POST['visible'];
 
-        if(isset($_POST['search_data']))
-        {
-            $id = $_POST['id'];
-            $visible = $_POST['visible'];
+        $query = "UPDATE faculty SET visible='$visible' WHERE id='$id' ";
+        $query_run = mysqli_query($connection, $query);
 
-            $query = "UPDATE faculty SET visible='$visible' WHERE id='$id' ";
+
+    }
+
+
+    if (isset($_POST['delete_multiple'])) {
+        $ids = $_POST['delete_ids']; // Comma-separated list of IDs
+
+        if (!empty($ids)) {
+            $id_array = explode(",", $ids);
+            $clean_ids = array_map('intval', $id_array); // Clean the input
+            $id_string = implode(",", $clean_ids);
+
+            // Only delete where visible=1 and ID is in the selected list
+            $query = "DELETE FROM faculty WHERE visible='1' AND id IN ($id_string)";
             $query_run = mysqli_query($connection, $query);
 
-
+            if ($query_run) {
+                $_SESSION['success'] = "Selected Data Deleted Successfully!";
+            } else {
+                $_SESSION['status'] = "Error Deleting Data!";
+            }
+        } else {
+            $_SESSION['status'] = "No Data Selected!";
         }
 
-
-        // this is the Delete Multiple Data Code // 
-        if(isset($_POST['delete_multiple']))
-        {
-            $id = "1";
-            $query = "DELETE FROM faculty WHERE visible='$id' ";
-            $query_run = mysqli_query($connection, $query);
-
-            if($query_run)
-            {
-                $_SESSION['success'] = "Your Data Is Successfully Deteled!";
-                header('Location: faculty.php');
-            }
-            else
-            {
-                $_SESSION['status'] = "Your Data Is Not Deleted!";
-                header('Location: faculty.php');
-            }
-        }
+        header('Location: faculty.php');
+    }
 
 
 
