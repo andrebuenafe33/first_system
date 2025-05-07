@@ -51,17 +51,21 @@ include('includes/_sidebar.php');
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Are you sure u want to delete data?</h5>
-                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">If u select "Yes" the data will be deleted mutiple!.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
-                    <form action="code.php" method="POST">
-                        <button type="submit" name="delete_multiple" class="btn btn-danger" >Yes</button>
-                    </form>
-                </div>
+                <form action="code.php" method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Are you sure you want to delete?</h5>
+                        <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        Selected data will be deleted.
+                        <!-- Hidden input to hold selected IDs -->
+                        <input type="hidden" name="delete_ids" id="delete_ids">
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" name="delete_multiple" class="btn btn-danger">Yes</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -84,11 +88,9 @@ include('includes/_sidebar.php');
                                         </button>
 
                                         <!-- Delete Multiple Button (Right) -->
-                                        <form action="code.php" method="POST">
-                                            <button type="button" name="delete_multiple" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deletemultipledata">
-                                                <i class="fas fa-trash"></i> Delete Multiple Data
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-danger" onclick="prepareDelete()" data-bs-toggle="modal" data-bs-target="#deletemultipledata">
+                                            <i class="fas fa-trash"></i> Delete Multiple Data
+                                        </button>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -135,7 +137,7 @@ include('includes/_sidebar.php');
                                                                     ?>          
                                                                 <tr>
                                                                     <td>
-                                                                        <input type="checkbox" onclick="toggleCheckbox(this)" value="<?php echo $row['id'] ?>" <?php echo $row['visible'] == 1 ? "checked" : "" ?> >  
+                                                                        <input type="checkbox" onclick="toggleCheckbox(this)" value="<?php echo $row['id'] ?>" <?php echo $row['visible'] == 1 ? "checked" : "" ?> >
                                                                     </td>
                                                                     <td><?php echo $row['id']?> </td>
                                                                     <td><?php echo $row['name']?></td>
@@ -180,7 +182,7 @@ include('includes/_sidebar.php');
                     </div>
                 </main>
 
-<!-- This is the scripts for the Multiple Dete -->
+<!-- This is the scripts for the checkbox -->
 <script>
     function toggleCheckbox(box) {
         var id = $(box).val(); 
@@ -198,6 +200,20 @@ include('includes/_sidebar.php');
                 console.log("Checkbox updated: ID " + id + ", Visible: " + visible);
             }
         });
+    }
+</script>
+
+<!-- This script is to collect the data from checkbox -->
+<script>
+    function prepareDelete() {
+        var selected = [];
+        $('input[type=checkbox]').each(function() {
+            if (this.checked && $(this).val() !== '') {
+                selected.push($(this).val());
+            }
+        });
+
+        $('#delete_ids').val(selected.join(','));
     }
 </script>
 
