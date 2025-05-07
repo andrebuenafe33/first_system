@@ -171,14 +171,14 @@ include('includes/_sidebar.php');
                                                                     <td> 
                                                                         <form action="faculty_edit.php" method="post">
                                                                             <input type="hidden" name="faculty_id" value="<?php echo $row['id']; ?>">
-                                                                        <button type="submit" name="faculty_edit" class="btn btn-info">
-                                                                            <i class="bi bi-pecil-square">EDIT</li>
-                                                                        </button>
+                                                                            <button type="submit" name="faculty_edit" class="btn btn-warning">
+                                                                                <i class="fas fa-edit"></i>
+                                                                            </button>
                                                                         </form>
                                                                     </td>
                                                                     <td> 
-                                                                        <button type="button" class="btn btn-danger" onclick="confirmDelete(<?php echo $row['id']; ?>)">
-                                                                            <i class="bi bi-trash3">DELETE</i>
+                                                                        <button type="submit" class="btn btn-danger"  onclick="confirmDelete(<?php echo $row['id']; ?>)">
+                                                                            <i class="fas fa-trash"></i>
                                                                         </button>
                                                                     </td>
                                                                 </tr>

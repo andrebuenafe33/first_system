@@ -54,5 +54,5 @@ include('includes/header.php');
 
 
 <?php
-include('includes/scripts.php');
+include('includes/_scripts.php');
 ?>

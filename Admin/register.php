@@ -70,7 +70,7 @@ include('includes/_sidebar.php');
                                             <?php 
                                                 if(isset($_SESSION['success']) && $_SESSION['success'] !="")
                                                 {
-                                                    echo '<h3> '.$_SESSION['success'].' </h3>';
+                                                    echo '<h3 class="bg-success"> '.$_SESSION['success'].' </h3>';
                                                     unset($_SESSION['success']);
                                                 }
 
