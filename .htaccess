@@ -1,0 +1,3 @@
+#This is 404 Error Page to show
+
+ErrorDocument 404 http://localhost/sample/404.php
